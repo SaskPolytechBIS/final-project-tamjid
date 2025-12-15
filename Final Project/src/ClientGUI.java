@@ -6,6 +6,9 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.io.IOException;
+import java.io.File;                        //added import
+import java.util.ArrayList;                 //added import
+import java.nio.file.Files;                 //added import
 
 /**
  *
@@ -30,6 +33,20 @@ public class ClientGUI extends JFrame implements ChatIF {
     private JButton loginB = new JButton("Login");
     private JButton sendB = new JButton("Send");
     private JButton quitB = new JButton("Quit");
+    // Add new buttons
+    private JButton browseB = new JButton("Browse");
+    private JButton saveB = new JButton("Save");
+    private JButton downloadB = new JButton("Download");
+    
+    // Add a JComboBox to display the list of files on the server
+    //JcomboBox is another swing GUI component in java 
+    // it provides a drop-down menu that lets user choose one time from a list
+    private JComboBox<String> fileComboBox = new JComboBox<>();
+    
+    // variable to hold the selected file
+    //this line declares a private instance variable named selectedFile of type File.
+    //an instance variable is a variable that belongs to an object which is an instance of a class.
+    private File selectedFile = null;
 
     /**
      * JFrame Text Fields.
