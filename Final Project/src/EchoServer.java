@@ -1,4 +1,8 @@
-import java.util.ArrayList;
+import java.io.File;            // For file handling to creat and access file
+import java.nio.file.Files;     // For working with file content like readAllBytes
+import java.nio.file.Paths;     // For creating file paths
+import java.io.IOException;     // For handling file related exceptions
+import java.util.ArrayList;     // For handling the ArrayList of file names
 
 public class EchoServer extends AbstractServer {
     //Class variables *************************************************
@@ -125,6 +129,147 @@ public class EchoServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
+        
+        // this block handles the "#ftpUpload" command sent by the client
+        // The client sends a file wrapped in an Envelope object with `#ftpUpload` as the command, 
+        // the filename as argument, and the file's content as a byte array in the data field
+        // The server saves the file into an "uploads" directory for future use  listing, downloading
+        
+        if (env.getCommand().equals("#ftpUpload")) //checks if the command in the Envelope object is #ftpUpload.
+        {
+            // Extract the filename from the envelope's "arg" field
+            String filename = env.getArg();     //arg is a string argument often the filename
+
+            // Extract file data
+            //expected to be a byte[] from the "data" field of the envelope
+            Object data = env.getData();
+
+            // Validate the filename and data
+            // Check if either the filename is null or the data is null or if the data is not a byte array
+            if (filename == null || data == null || !(data instanceof byte[])) 
+            {
+                System.out.println("Invalid #ftpUpload command: Missing or incorrect arguments.");
+                return; // If validation fails, print an error message and exit this block
+            }
+
+            // If validation passes, cast the Object `data` into a byte array
+            byte[] fileBytes = (byte[]) data;
+            
+            // synchronized is a keyword in Java used to control thread access to blocks of code.
+            //Synchronization ensures that multiple clients 
+            //uploading files simultaneously won’t overwrite or interfere with each other's file operations.
+            // Synchronize the file-writing process to avoid error during concurrent uploads
+            synchronized (this) {
+                try {
+                    // Ensure the "uploads" directory exists. If not create it.
+                    File uploadsDir = new File("uploads");
+                    uploadsDir.mkdirs(); //  create the directory if it doesn't already exist
+                    
+                    //Converts the fileBytes into a physical file using the Files.write method.
+                    //The file is saved in the uploads directory under the given filename.
+                    // Write the received byte array data to a new file with the given filename in the "uploads" directory
+                    Files.write(Paths.get("uploads/" + filename), fileBytes);
+
+                    // Log a success message in the server's console
+                    System.out.println("File uploaded successfully: " + filename);
+                } catch (IOException ioException) {
+                    // Handle any IO exceptions that occur during the file writing process
+                    System.out.println("Error saving uploaded file: " + ioException.getMessage());
+                }
+            }
+        }
+        
+        // The "#ftplist" command allows the client to request a list of files stored in the server's "uploads" directory
+        //  The server responds by
+        //// 1. Checking if the "uploads" directory exists, creating it if necessary
+        //// 2. Listing all files inside the "uploads" directory
+        //// 3. Sending the list of file names back to the client in an Envelope object
+
+        if (env.getCommand().equals("#ftplist"))    //checks if the Envelope contains the #ftplist command from the client
+        {
+            // Create a reference to the "uploads" directory
+            File uploadsDir = new File("uploads");
+
+            // Check if the "uploads" directory exists; if not, create it to ensure it's ready for listing
+            if (!uploadsDir.exists()) {
+                uploadsDir.mkdirs(); // Create the directory (and parent directories if needed)
+            }
+
+            // List all files in the "uploads" directory
+            File[] files = uploadsDir.listFiles();
+
+            // Create an ArrayList to hold the file names
+            ArrayList<String> fileNames = new ArrayList<>();
+
+            // If the directory is not empty, retrieve the names of each file
+            if (files != null) {
+                for (File file : files) {
+                    fileNames.add(file.getName()); // Add each file's name to the list
+                }
+            }
+
+            // Package the file list into an Envelope object to send back to the client
+            Envelope listResponse = new Envelope("#ftplist", null, fileNames);
+
+            // Attempt to send the Envelope to the client
+            try {
+                client.sendToClient(listResponse); // Sends the file list back to the client
+            } catch (IOException ioException) {
+                // Handle errors that occur while attempting to send the response
+                System.out.println("Error sending file list to client: " + ioException.getMessage());
+            }
+        }
+        
+        // The "#ftpget" command allows the client to download a specific file from the server's "uploads" directory
+        //  The server performs the following:
+        // 1. Extracts the filename from the Envelope's "arg" field
+        // 2. Checks if the file exists in the "uploads" directory
+        // 3. If the file exists, reads its content into a byte array and sends it in an Envelope to the client
+        // 4. If the file doesn't exist, sends an error message to the client
+
+        if (env.getCommand().equals("#ftpget"))         //Checks if the Envelope contains the #ftpget command from the client
+        {
+            // Extract the filename from the "arg" field in the envelope
+            String filename = env.getArg();
+
+            // Validate the filename, otherwiselog an error and stop processing
+            if (filename == null) {
+                System.out.println("Invalid #ftpget command: No filename provided.");
+                return; // Exit if the filename is missing
+            }
+
+            // Create a reference to the file to be downloaded
+            File file = new File("uploads/" + filename);
+
+            // Check if the file exists in the "uploads" directory
+            if (file.exists()) {
+                try {
+                    // Read the file's contents into a byte array
+                    byte[] fileBytes = Files.readAllBytes(file.toPath());
+
+                    // Package the file's content into an Envelope and send it to the client
+                    Envelope fileResponse = new Envelope("#ftpget", filename, fileBytes);
+                    client.sendToClient(fileResponse); // Send the file content
+
+                } catch (IOException ioException) {
+                    // Handle errors that occur while reading the file
+                    System.out.println("Error reading file for download: " + ioException.getMessage());
+                    try {
+                        // Notify the client about the file reading error
+                        client.sendToClient(new Envelope("#ftpget", filename, "Error reading file."));
+                    } catch (IOException ex) {
+                        System.out.println("Failed to notify client about file reading error: " + ex.getMessage());
+                    }
+                }
+            } else {
+                // If the file doesn't exist, notify the client
+                try {
+                    client.sendToClient(new Envelope("#ftpget", filename, "File not found"));
+                } catch (IOException ioException) {
+                    System.out.println("Error notifying client about missing file: " + ioException.getMessage());
+                }
+            }
+        }        
     }
 
     public ArrayList<String> getAllClientsInRoom(String room)
