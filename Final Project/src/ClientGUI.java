@@ -215,7 +215,7 @@ public class ClientGUI extends JFrame implements ChatIF {
         // This code block handles the Download button, allowing the user to request and download a file from the server
         // The selected file name is retrieved from the fileComboBox, and the #ftpget command is sent to the server
         downloadB.addActionListener(new ActionListener() {
-            @Override
+            
             public void actionPerformed(ActionEvent e) {
                 // Get the selected file name from the fileComboBox (drop-down menu)
                 String selectedFile = (String) fileComboBox.getSelectedItem();
