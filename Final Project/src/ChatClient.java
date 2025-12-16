@@ -1,4 +1,4 @@
-
+    
 import java.io.*;
 import java.util.ArrayList;
 
@@ -87,6 +87,13 @@ public class ChatClient extends AbstractClient {
                 clientUI.display("Could not send message to server.  Terminating client.......");
                 quit();
             }
+        }
+    }
+    public void handleMessageFromClientUI(Envelope envelope) {
+        try {
+            sendToServer(envelope); // Send the Envelope object to the server
+        } catch (IOException e) {
+            clientUI.display("Could not send envelope to server: " + e.getMessage());
         }
     }
 

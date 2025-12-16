@@ -96,7 +96,7 @@ public class ClientGUI extends JFrame implements ChatIF {
 
         //Set the Layout of the buttons to be a grid
         //see changing what each of this values does 
-        bottom.setLayout(new GridLayout(6, 2, 5, 5));
+        bottom.setLayout(new GridLayout(9, 2, 5, 5));
         bottom.add(hostLB); //how does these button gets ordered as we create item it will get ordered by the gridlayout order
         bottom.add(hostTxF); //so host lb will first populate the 
         bottom.add(portLB);
@@ -105,10 +105,17 @@ public class ClientGUI extends JFrame implements ChatIF {
         bottom.add(userIdTxF);
         bottom.add(messageLB);
         bottom.add(messageTxF);
+        bottom.add(new JLabel("File List: ", JLabel.RIGHT));
+        bottom.add(fileComboBox);               // ComboBox to display the list of files
         bottom.add(loginB);
         bottom.add(sendB);
         bottom.add(logoffB);
         bottom.add(quitB);
+        // Add new components to the bottom JPanel
+        bottom.add(browseB);                    // Button to select a file to upload
+        bottom.add(saveB);                      // Button to upload the selected file
+
+        bottom.add(downloadB);                  // Button to download the selected file
 
         //an isntance of a command 
         
@@ -146,6 +153,66 @@ public class ClientGUI extends JFrame implements ChatIF {
                 send("#logoff");
             }
         });
+        //this code block opens a JfileChooser dialog that allows the user to select a file for upload
+        //stores the selected file in selectedFiles
+        
+        // Action Listener for the Browse Button
+browseB.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // Open a file chooser dialog for selecting a file
+        JFileChooser fileChooser = new JFileChooser();
+
+        int result = fileChooser.showOpenDialog(ClientGUI.this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedFile = fileChooser.getSelectedFile(); // Store the selected file
+            display("Selected file: " + selectedFile.getAbsolutePath()); // Display file path
+        } else {
+            display("File selection cancelled.");
+        }
+    }
+});
+        //
+        // Action Listener for the Save Button
+saveB.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (selectedFile != null) { // Check if a file is selected
+            try {
+                // Read the file contents into a byte array
+                byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
+                Envelope env = new Envelope("#ftpUpload", selectedFile.getName(), fileBytes);
+
+                client.handleMessageFromClientUI(env); // Send Envelope to the server
+                display("File uploaded: " + selectedFile.getName());
+
+
+            } catch (IOException ioException) {
+                display("Error reading or uploading file: " + ioException.getMessage());
+            }
+        } else {
+            display("No file selected to upload.");
+        }
+    }
+});
+
+        
+                // Action Listener for the Download Button
+        downloadB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get the selected file name from the fileComboBox
+                String selectedFile = (String) fileComboBox.getSelectedItem();
+
+                if (selectedFile != null) {
+                    // Send the download command to the server
+                    client.handleMessageFromClientUI("#ftpget " + selectedFile);
+                    display("Requesting download of file: " + selectedFile);
+                } else {
+                    display("No file selected for download.");
+                }
+            }
+        });        
         
         quitB.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
