@@ -1,3 +1,7 @@
+//EchoServer class extends AbstractServer and acts as a server capable of managing client connections
+//and processing client commands like upload.
+
+
 import java.io.File;            // For file handling to creat and access file
 import java.nio.file.Files;     // For working with file content like readAllBytes
 import java.nio.file.Paths;     // For creating file paths
@@ -158,7 +162,7 @@ public class EchoServer extends AbstractServer {
             // Extract the filename from the "arg" field in the envelope
             String filename = env.getArg();
 
-            // Validate the filename, otherwiselog an error and stop processing
+            // Validate the filename, otherwise log an error and stop processing
             if (filename == null) {
                 System.out.println("Invalid #ftpget command: No filename provided.");
                 return; // Exit if the filename is missing

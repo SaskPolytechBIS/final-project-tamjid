@@ -1,3 +1,6 @@
+//ClientGUI class creates a  graphical user interface for the chat client
+//which allows users to send messagesinteract with the server. 
+//It handles interaction between the chat client and the user via a graphical interface
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -162,7 +165,7 @@ public class ClientGUI extends JFrame implements ChatIF {
                 // Open a JFileChooser dialog for selecting a file
                 JFileChooser fileChooser = new JFileChooser();
 
-                // Show the dialog and store the user's action (e.g., approve or cancel)
+                // Show the dialog and store the user's action 
                 int result = fileChooser.showOpenDialog(ClientGUI.this);
 
                 // If the user selected a file and clicked "Open"

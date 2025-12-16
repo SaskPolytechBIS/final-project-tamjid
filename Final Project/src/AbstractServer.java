@@ -1,8 +1,16 @@
+//The AbstractServer class is a server framework that handles client connections and communication
+//It allows subclasses to define how messages from clients are processed
+//main frontend logic
+
 
 import java.net.*;
 import java.util.*;
 import java.io.*;
 
+
+////An abstract class is like a blueprint for other classes. can't make object from it directly
+//used to set rules or methods that must be created in child class
+//echoServer is a child class of abstract server
 public abstract class AbstractServer implements Runnable {
 
     /**
