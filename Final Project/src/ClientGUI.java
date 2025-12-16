@@ -82,7 +82,7 @@ public class ClientGUI extends JFrame implements ChatIF {
 
         //create the GUI Window
         super("Simple Chat GUI");
-        setSize(300, 400);
+        setSize(400, 500);              //widht400 ; height 500
 
         //setup the JFrame layout
         setLayout(new BorderLayout(5, 5));
@@ -153,66 +153,86 @@ public class ClientGUI extends JFrame implements ChatIF {
                 send("#logoff");
             }
         });
-        //this code block opens a JfileChooser dialog that allows the user to select a file for upload
-        //stores the selected file in selectedFiles
-        
-        // Action Listener for the Browse Button
-browseB.addActionListener(new ActionListener() {
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // Open a file chooser dialog for selecting a file
-        JFileChooser fileChooser = new JFileChooser();
+      
+        // This code block opens a JFileChooser dialog allowing the user to browse and select a file for uploading
+        // The selected file is stored in 'selectedFile', and its path is displayed in the message list
+        browseB.addActionListener(new ActionListener() {
+            
+            public void actionPerformed(ActionEvent e) {
+                // Open a JFileChooser dialog for selecting a file
+                JFileChooser fileChooser = new JFileChooser();
 
-        int result = fileChooser.showOpenDialog(ClientGUI.this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile(); // Store the selected file
-            display("Selected file: " + selectedFile.getAbsolutePath()); // Display file path
-        } else {
-            display("File selection cancelled.");
-        }
-    }
-});
-        //
-        // Action Listener for the Save Button
-saveB.addActionListener(new ActionListener() {
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (selectedFile != null) { // Check if a file is selected
-            try {
-                // Read the file contents into a byte array
-                byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
-                Envelope env = new Envelope("#ftpUpload", selectedFile.getName(), fileBytes);
+                // Show the dialog and store the user's action (e.g., approve or cancel)
+                int result = fileChooser.showOpenDialog(ClientGUI.this);
 
-                client.handleMessageFromClientUI(env); // Send Envelope to the server
-                display("File uploaded: " + selectedFile.getName());
-
-
-            } catch (IOException ioException) {
-                display("Error reading or uploading file: " + ioException.getMessage());
+                // If the user selected a file and clicked "Open"
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    selectedFile = fileChooser.getSelectedFile(); // Store the selected file in the variable
+                    display("Selected file: " + selectedFile.getAbsolutePath()); // Display the file path to the user
+                } else {
+                    // If the user canceled the selection
+                    display("File selection cancelled.");
+                }
             }
-        } else {
-            display("No file selected to upload.");
-        }
-    }
-});
-
+        });
+        // the saveB button uploads a file to the server
+        //It checks if a file has been selected 
+        //If valid the file is read as a byte array
+        //An Envelope is created containing the #ftpUpload command, file name, and file data
+        //The Envelope is sent to the server using handleMessageFromClientUI
         
-                // Action Listener for the Download Button
+        
+        // This code block uploads the selected file to the server when the Save button is clicked
+        // It reads the file's contents, wraps it in an Envelope, and sends it to the server
+        saveB.addActionListener(new ActionListener() {
+            
+            public void actionPerformed(ActionEvent e) {
+                // Check if a file has been selected
+                if (selectedFile != null) {
+                    try {
+                        // Read the file contents into a byte array
+                        byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
+
+                        // Create an Envelope with the #ftpUpload command, file name, and file data
+                        Envelope env = new Envelope("#ftpUpload", selectedFile.getName(), fileBytes);
+
+                        // Send the Envelope to the server
+                        client.handleMessageFromClientUI(env);
+
+                        // Display a success message to the user
+                        display("File uploaded: " + selectedFile.getName());
+                    } catch (IOException ioException) {
+                        // Handle any errors that occur during file reading or upload
+                        display("Error reading or uploading file: " + ioException.getMessage());
+                    }
+                } else {
+                    // No file selected: Notify the user
+                    display("No file selected to upload.");
+                }
+            }
+        });
+        
+        // This code block handles the Download button, allowing the user to request and download a file from the server
+        // The selected file name is retrieved from the fileComboBox, and the #ftpget command is sent to the server
         downloadB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Get the selected file name from the fileComboBox
+                // Get the selected file name from the fileComboBox (drop-down menu)
                 String selectedFile = (String) fileComboBox.getSelectedItem();
 
+                // If no file is selected, notify the user
                 if (selectedFile != null) {
-                    // Send the download command to the server
+                    // Send the download command (#ftpget) along with the selected file name to the server
                     client.handleMessageFromClientUI("#ftpget " + selectedFile);
+
+                    // Inform the user that the download request is being processed
                     display("Requesting download of file: " + selectedFile);
                 } else {
+                    // If no file is selected from the dropdown, display an error message
                     display("No file selected for download.");
                 }
             }
-        });        
+        });      
         
         quitB.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

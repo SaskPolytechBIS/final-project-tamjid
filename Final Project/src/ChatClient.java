@@ -89,6 +89,9 @@ public class ChatClient extends AbstractClient {
             }
         }
     }
+    //The provided code block for handleMessageFromClientUI(Envelope envelope)
+    //this is an overloaded method in my ChatClient class
+    //It handles Envelope objects as input and sends them to the server
     public void handleMessageFromClientUI(Envelope envelope) {
         try {
             sendToServer(envelope); // Send the Envelope object to the server
