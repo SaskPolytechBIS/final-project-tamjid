@@ -62,69 +62,7 @@ public class EchoServer extends AbstractServer {
     
     public void handleCommandFromClient(Envelope env, ConnectionToClient client)
     {
-        //command: setName
-        //arg: 
-        //data: String - new name for client
-        if(env.getCommand().equals("setName"))
-        {
-            String userId = (String) env.getData();
-            client.setInfo("UserId", userId);
-        }
-        
-        //command: join
-        //arg:
-        //data: String - name for room the user wants to join
-        if(env.getCommand().equals("join"))
-        {
-            String room = (String)env.getData();
-            client.setInfo("room", room);
-            if(client.getInfo("UserId") != null)
-            {
-                String UserId = (String)client.getInfo("UserId");
-                System.out.println("<"+UserId+" has joined room "+room+">");
-            }
-            else
-            {
-                System.out.println("<User has joined room "+room+">");
-            }
-        }
-        
-        //command: pm
-        //arg: target for the pm
-        //data: String - text of the pm
-        if(env.getCommand().equals("pm"))
-        {
-            String target = env.getArg();
-            String text = (String)env.getData();
-            
-            sendToClientByUserId(text,target);
-        }
-        
-        if(env.getCommand().equals("who"))
-        {
-            //find out what room the person who sent the command is in
-            String room = (String)client.getInfo("room");
-            
-            //find all users in the same room and store in an ArrayList<String>
-            ArrayList<String> clientList = getAllClientsInRoom(room);
-            
-            //create an envelope with an Id of "who"
-            //add the arraylist as the data
-            Envelope returnEnv = new Envelope();
-            returnEnv.setCommand("who");
-            returnEnv.setData(clientList);
-            
-            //use the sendToClient function from ConnectionToClient to send the envelope
-            //back to the client who sent the command
-            try{
-                client.sendToClient(returnEnv);
-            }
-            catch(Exception e)
-            {
-                System.out.println("Something went wrong when trying to send who return envelope");
-                e.printStackTrace();
-            }
-        }
+    
     }
 
     public ArrayList<String> getAllClientsInRoom(String room)
