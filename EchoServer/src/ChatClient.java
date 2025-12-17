@@ -75,6 +75,15 @@ public class ChatClient extends AbstractClient {
             }
         }
     }
+    public void handleMessageFromClientUI (Envelope envelope){
+        try {
+             sendToServer(envelope);
+        
+       } catch (IOException e){
+           clientUI.display("failed to send envelope to server:" + e.getMessage());
+       }
+        
+    }
 
     /**
      * This method terminates the client.
