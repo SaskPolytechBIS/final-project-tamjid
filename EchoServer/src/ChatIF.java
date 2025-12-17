@@ -1,4 +1,4 @@
-//ChatIF interface defines a method display to show messages on the user interface for both the client and server
+
 /**
  * This interface implements the abstract method used to display
  * objects onto the client or server UIs.

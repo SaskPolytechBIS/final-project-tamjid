@@ -1,7 +1,4 @@
-//The ChatClient class extends the AbstractClient class and provides features for interacting with the server
-//It handles both plain and structured messages like Envelope
-//processes commands from the user
-// and handles communication between the ChatIF and the server  
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -35,7 +32,7 @@ public class ChatClient extends AbstractClient {
 
     //Instance methods ************************************************
     /**
-     * This method handles all data that comes in from the server.vi
+     * This method handles all data that comes in from the server.
      *
      * @param msg The message from the server.
      */
@@ -90,16 +87,6 @@ public class ChatClient extends AbstractClient {
                 clientUI.display("Could not send message to server.  Terminating client.......");
                 quit();
             }
-        }
-    }
-    //The provided code block for handleMessageFromClientUI(Envelope envelope)
-    //this is an overloaded method in my ChatClient class
-    //It handles Envelope objects as input and sends them to the server
-     public void handleMessageFromClientUI(Envelope envelope) {
-        try {
-            sendToServer(envelope); // Send the Envelope object to the server
-        } catch (IOException e) {
-            clientUI.display("Could not send envelope to server: " + e.getMessage());
         }
     }
 
@@ -193,7 +180,93 @@ public class ChatClient extends AbstractClient {
             }
         }
         
-    
+        //#setName Mike
+        if(message.indexOf("#setName") == 0)
+        {
+            //create an envelope
+            Envelope env = new Envelope();
+            //set the command
+            env.setCommand("setName");
+            
+            //grab the name from the message and add it as the envelopes data
+            String name = message.substring(9, message.length());
+            env.setData(name);
+            
+            //try sending the envelope to the server
+            try {
+                sendToServer(env);
+            } catch (IOException e) {
+                clientUI.display("Could not send message to server.  Terminating client.......");
+                quit();
+            }
+        }
+        
+        //#join room1
+        if(message.indexOf("#join") == 0)
+        {
+            //make envelope to send to server
+            Envelope env = new Envelope();
+            env.setCommand("join");
+            
+            //get the room name
+            String room = message.substring(6,message.length());
+            env.setData(room);
+            
+            //try sending the envelope to the server
+            try {
+                sendToServer(env);
+            } catch (IOException e) {
+                clientUI.display("Could not send message to server.  Terminating client.......");
+                quit();
+            }
+        }
+        
+        //#pm mike hi mike!
+        if(message.indexOf("#pm") == 0)
+        {
+            Envelope env = new Envelope();
+            env.setCommand("pm");
+            
+            //hannah hi hannah!
+            String targetAndText = message.substring(4, message.length());
+            
+            //hann
+            String target = targetAndText.substring(0, targetAndText.indexOf(" "));
+            
+            //h hi hannah!
+            //this line is storing the text of the pm
+            //targetAndText is the original message without #pm
+            //substring lets us get part of a string
+            //indexOf(" ") lets us get the position of the first space
+            //we add +1 so we dont include the space in the text
+            String text = targetAndText.substring(targetAndText.indexOf(" ")+1, targetAndText.length());
+            
+            env.setArg(target);
+            env.setData(text);
+            
+            //try sending the envelope to the server
+            try {
+                sendToServer(env);
+            } catch (IOException e) {
+                clientUI.display("Could not send message to server.  Terminating client.......");
+                quit();
+            }
+                      
+        }
+        
+        if(message.equals("#who"))
+        {
+            Envelope env = new Envelope();
+            env.setCommand("who");
+            
+            //try sending the envelope to the server
+            try {
+                sendToServer(env);
+            } catch (IOException e) {
+                clientUI.display("Could not send message to server.  Terminating client.......");
+                quit();
+            }
+        }
     }
 
 }
